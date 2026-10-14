@@ -4,3 +4,4 @@
 
 - `index.html` 병원 CRM 기획 자료 (현황 진단, 벤치마크, 기능 지도, 핵심 기능, 에이전트, 규제 제약, 단계별 진행)
 - `general-crm.html` 범용 CRM 제품 기획 (코어 + 업종 팩 구조)
+- `competitor-analysis.html` 병원 CRM 경쟁 비교 (CRM·마케팅·재무 영역 업체 비교와 1stCRM 가치 상승 방안)

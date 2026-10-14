@@ -1,0 +1,156 @@
+<title>병원 CRM 경쟁 비교</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: 팀 공유용 분석 문서. 결론 → 시장 지도 → 영역별 비교표 3개 → AI 롤업 → 가치 상승 방안 → 미확인 */
+:root{
+  --bg:#F6F7FA; --surface:#FFFFFF; --fg:#0B1630; --muted:#5A6580; --line:#DDE1EA;
+  --navy:#03153B; --blue:#1070FC; --link:#0C56C2; --tint:#E8F0FE;
+  --good:#12805C; --warn:#B26A00; --crit:#B3261E;
+  --sans:"IBM Plex Sans KR",system-ui,sans-serif; --mono:"IBM Plex Mono",ui-monospace,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#050E24; --surface:#0A1A3D; --fg:#E6EAF4; --muted:#9AA6C0; --line:#1B2C54;
+  --blue:#5B9BFF; --link:#7DB0FF; --tint:#10264F;
+  --good:#4CC9A0; --warn:#E0A32E; --crit:#FF8A80; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#050E24; --surface:#0A1A3D; --fg:#E6EAF4; --muted:#9AA6C0; --line:#1B2C54;
+  --blue:#5B9BFF; --link:#7DB0FF; --tint:#10264F;
+  --good:#4CC9A0; --warn:#E0A32E; --crit:#FF8A80; color-scheme:dark}
+body{background:var(--bg);color:var(--fg);font-family:var(--sans);font-size:15px;line-height:1.7}
+main{max-width:1000px;margin-inline:auto;padding-inline:20px;padding-block:40px 80px;display:flex;flex-direction:column;gap:52px}
+h1{font-size:30px;line-height:1.3;margin:0;font-weight:700;text-wrap:balance}
+h2{font-size:20px;margin:0;font-weight:700;text-wrap:balance}
+h3{font-size:15px;margin:0;font-weight:600}
+p{margin:0}
+.eyebrow,.tag,th{font-family:var(--mono);font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.meta{font-family:var(--mono);font-size:12px;color:var(--muted);line-height:1.6}
+section{display:flex;flex-direction:column;gap:16px;min-width:0}
+header{display:flex;flex-direction:column;gap:14px}
+.lede{font-size:17px;max-width:66ch}
+.sub{color:var(--muted);max-width:72ch}
+.grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:12px}
+.box{background:var(--surface);border:1px solid var(--line);padding:14px 16px;display:flex;flex-direction:column;gap:6px;min-width:0}
+.box.key{border-color:var(--blue);background:var(--tint)}
+.tw{overflow-x:auto;border:1px solid var(--line);background:var(--surface)}
+table{border-collapse:collapse;width:100%;min-width:820px;font-size:13.5px}
+th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+tr:last-child td{border-bottom:0}
+td:first-child{font-weight:600;min-width:120px}
+tr.us td{background:var(--tint)}
+.pill{font-family:var(--mono);font-size:11px;padding:1px 7px;border:1px solid currentColor;white-space:nowrap;display:inline-block}
+.p-ok{color:var(--good)} .p-ask{color:var(--warn)} .p-no{color:var(--crit)}
+.layers{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}
+.layer{border:1px solid var(--line);background:var(--surface);padding:12px 14px;display:flex;flex-direction:column;gap:6px;min-width:0}
+.layer.us{background:var(--navy);border-color:var(--navy);color:#fff}
+.layer.us .tag{color:#9FB6E6}
+.layer small{color:var(--muted);font-size:13px;line-height:1.55}
+.layer.us small{color:#C9D7F5}
+ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:5px}
+.note{border-left:3px solid var(--warn);padding:8px 14px;background:var(--surface);color:var(--muted);font-size:14px}
+a{color:var(--link)}
+:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+</style>
+
+<main>
+<header>
+  <span class="eyebrow">Cofoundary · 1stCRM 경쟁·가치 분석 · 2026-10-13</span>
+  <h1>병원의 모든 연결이 지나가는 자리, 1stCRM</h1>
+  <p class="lede">CRM, 마케팅, 재무 영역의 업체 약 25곳을 조사함. 공통으로 보이는 공백은 비급여 병원의 수납·상담·시술 데이터를 가진 EMR이 직접 연결해 주는 전환 추적과 재무 연동임. 1stCRM은 그 데이터를 보유 중임.</p>
+</header>
+
+<section>
+  <h2>결론</h2>
+  <div class="grid3">
+    <div class="box key"><span class="tag">해석 1</span><h3>우리는 연동의 "상대"가 될 수 있음</h3><p>애프터닥, AiU, 래니는 EMR이 없고 기존 EMR에 연동해 사용함. 베가스CRM은 AiU를 정식 연동했고 강남언니는 CRM 연동 대상 목록을 운영함. 데이터를 가진 EMR+CRM이 연동 파트너가 되는 구조가 시장에서 이미 작동 중임.</p></div>
+    <div class="box key"><span class="tag">해석 2</span><h3>공백은 두 곳임</h3><p>유입 → 상담 → 결제를 잇는 폐루프 전환 추적, 그리고 비급여 수납 데이터 기반 재무 연동임. 조사한 재무 업체 중 비급여 매출을 다루는 곳은 확인하지 못함.</p></div>
+    <div class="box key"><span class="tag">해석 3</span><h3>AI 롤업 논리는 번역이 필요함</h3><p>마진 개선 레버는 인건비 비중이 큰 서비스업에 맞음. 소프트웨어인 1stCRM은 AI 업셀, 원가 절감, 데이터 상품화로 바꿔 적용해야 함.</p></div>
+  </div>
+</section>
+
+<section>
+  <h2>시장 지도</h2>
+  <div class="layers">
+    <div class="layer"><span class="tag">직접 경쟁 · EMR+CRM</span><h3>베가스CRM, 닥터팔레트, TalkCRM</h3><small>데이터를 가진 쪽. 신규 개원 시장과 외부 AI 연동이 쟁점</small></div>
+    <div class="layer"><span class="tag">AI 레이어 · 연동형</span><h3>애프터닥, AiU, 래니, 리비짓</h3><small>EMR 없이 응대·예약·재방문을 AI가 대행</small></div>
+    <div class="layer"><span class="tag">유입 채널</span><h3>강남언니, 클라우드호스피탈</h3><small>예약 채널에서 CRM으로 수직계열화 시도</small></div>
+    <div class="layer"><span class="tag">마케팅 대행·플랫폼</span><h3>컴플, 윈에이드, 지오컴퍼니, 옵티스랩</h3><small>대행 중심. 전환 데이터는 병원에서 받아야 함</small></div>
+    <div class="layer"><span class="tag">재무</span><h3>메디바로, 그랜터, 닥터북</h3><small>급여 청구 또는 통장·카드 기반. 비급여 수납 연동은 공백</small></div>
+    <div class="layer us"><span class="tag">우리</span><h3>1stCRM, 약 200개 병원</h3><small>피부·성형 EMR+CRM, 수납·상담·시술·통화 데이터 보유</small></div>
+  </div>
+</section>
+
+<section>
+  <h2>CRM·AI 비교</h2>
+  <div class="tw"><table>
+    <thead><tr><th>업체</th><th>유형</th><th>규모 (공개)</th><th>AI</th><th>재방문·자동화</th><th>유입·전환 추적</th></tr></thead>
+    <tbody>
+      <tr class="us"><td>1stCRM</td><td>EMR+CRM 통합</td><td>약 200개 병원 (내부)</td><td>STT 적용. 그 외 AI는 확인 못함</td><td>자동 문자 고정 8종 + 3개월 미방문 윈백</td><td>유입경로 코드값 있음. 전환·ROI 추적은 확인 못함. 네이버·강남언니·닥톡 외부예약 연동</td></tr>
+      <tr><td>베가스CRM (티엔에이치)</td><td>EMR+CRM 통합</td><td>신규 개원 피부·미용·성형의 약 45% (2025 1Q, 회사 주장)</td><td>자체 AI는 확인 못함. AiU 정식 연동(약 1,800개 병원 공급 예정), 애프터닥은 연동 계획</td><td>확인 못함</td><td>강남언니 앱 예약 연동, 전용 설정</td></tr>
+      <tr><td>닥터팔레트 (위버케어)</td><td>EMR (CRM 통합, 얕음)</td><td>약 150곳 (2025-01 기사)</td><td>상담 AI: 시술이력 요약, 자동 차팅, 외국어 전사 (2026-06 기사)</td><td>그룹 알림 있음. 자동 여정은 "연동 예정"이라는 문구뿐</td><td>확인 못함. 네이버 예약 연동</td></tr>
+      <tr><td>애프터닥 (메디팔)</td><td>연동형 재진 관리</td><td>500곳 (자체 표기)</td><td>AI 상담코치, 콜 매니저, 글로벌 코디네이터, 예약 스케줄러</td><td>치료유형별 최장 1년 자동 케어, 재내원 유도</td><td>확인 못함</td></tr>
+      <tr><td>와이즈에이아이 AiU</td><td>연동형 AI 매출 플랫폼</td><td>AI 도입 749곳 (자체 표기)</td><td>AI 전화(인·아웃바운드), 챗봇, 24시간 응대</td><td>검진시기 안내, 예약 미이행 환자 안내</td><td>유입 분석 표기. 카카오 상담톡·네이버톡톡 통합</td></tr>
+      <tr><td>래니 (플라스크)</td><td>연동형 AI 운영</td><td>도입 병원 확인 못함 (2026-05 출시)</td><td>AI 응대, AI 홈페이지, AI 광고·콘텐츠</td><td>예약 리마인더, 재방문 안내</td><td>채널별 유입·ROI 산출이라고 서술. 실제 가동은 확인 못함</td></tr>
+      <tr><td>리비짓 (모션랩스)</td><td>카톡 기반 환자 여정</td><td>유료 600곳+ (2026-07 기사)</td><td>의료법 가이드 기반 템플릿 추천</td><td>예약·방문 전·진료 후·재방문 자동 안내</td><td>확인 못함</td></tr>
+      <tr><td>TalkCRM (성민네트웍스)</td><td>비급여 CRM·CTI·펜차트</td><td>약 250곳 (보도자료)</td><td>AI 상담 자동화 (보도자료)</td><td>시술 이력 기반 개인화 메시지, 노쇼 방지</td><td>확인 못함. 1인 월 4만원</td></tr>
+      <tr><td>강남언니 (힐링페이퍼)</td><td>채널 플랫폼 + CRM 연동</td><td>시리즈C 428억 (2025-02)</td><td>확인 못함</td><td>—</td><td>베가스, 스마트닥터, 플래시스, 모션차트, KOS와 연동. 자체 CRM 제공 계획 발표</td></tr>
+    </tbody>
+  </table></div>
+  <p class="meta">메디패스는 병원 CRM이 아니라 메디블록(위버케어 계열)의 환자용 의료 여권 앱이라 비교표에서 뺐음. 기사 기준 정보는 EP CRM(유입경로·여정 분석 서술)과 유비케어 플러스CRM(2018 기사) 등이 더 있음.</p>
+  <p class="meta">출처: <a href="https://afterdoc.ai/">애프터닥</a> · <a href="https://ai.wiseai.co.kr">AiU</a> · <a href="https://www.venturesquare.net/1029484/">베가스CRM·애프터닥 제휴</a> · <a href="https://www.medigatenews.com/news/2016822776">닥터팔레트 AI</a> · <a href="https://www.newswire.co.kr/newsRead.php?no=1033922">래니</a> · <a href="https://www.unicornfactory.co.kr/article/2026072309585240775">리비짓</a> · <a href="https://www.unicornfactory.co.kr/article/2025021709224423209">강남언니</a></p>
+</section>
+
+<section>
+  <h2>마케팅 비교</h2>
+  <div class="tw"><table>
+    <thead><tr><th>업체</th><th>형태</th><th>서비스</th><th>전환 추적</th><th>과금·규모 (자체 표기)</th></tr></thead>
+    <tbody>
+      <tr><td>컴플</td><td>대행 (피부과 특화 페이지)</td><td>시술별 키워드·랜딩, 플레이스, 리뷰, 블로그, 홈페이지, 광고 운영, 월간 리포트</td><td>상담신청·예약완료·내원 3단계별 환자당 비용. UTM, 픽셀, GA4, 콜 트래킹으로 중복 제거. 병원이 원데이터 열람</td><td>광고비 마크업 없음. 월 예산 예시 200만·500만·1,000만 원 이상. 누적 의료기관 3,586곳, 월 운영 200곳+</td></tr>
+      <tr><td>윈에이드</td><td>종합 대행</td><td>플레이스, SEO, 퍼포먼스, AEO·GEO, AI 홈페이지, 심의, 인플루언서, 해외환자, 병원 CRM·재방문 관리 메뉴</td><td>확인 못함</td><td>가격 비공개. 누적 고객사 300곳+</td></tr>
+      <tr><td>지오컴퍼니</td><td>대행 (AI 검색 노출)</td><td>SEO, ChatGPT·Gemini·Perplexity 언급용 콘텐츠, 바이럴, 의료광고 심의 대행</td><td>GEO 성과는 담당자가 월 1회 이상 직접 질문해 수기 기록</td><td>가격·고객 수 비공개</td></tr>
+      <tr><td>옵티스랩</td><td>플랫폼 + 대행</td><td>리드 생성, SEO·AEO·GEO, 진료과별 정보 사이트 운영, 파트너 대시보드</td><td>파트너가 상담·내원 결과를 대시보드에 입력해 콘텐츠 개선에 사용(폐루프)</td><td>카테고리별 월 정액, 건당 과금 없음, 최대 3개월 무료 테스트</td></tr>
+      <tr><td>클라우드호스피탈</td><td>SaaS (해외환자)</td><td>다국어 웹사이트, 예약·영상상담·결제·사후관리, 마케팅 자동화 엔진(개발 중)</td><td>확인 못함</td><td>국내 출시 10개월 만에 80개 병원, 누적 투자 85억 원 (2025-11 기사)</td></tr>
+      <tr><td>닥터송</td><td>확인 못함</td><td>"병원 마케팅", "AI 솔루션" 메뉴만 있음</td><td>확인 못함</td><td>확인 못함</td></tr>
+    </tbody>
+  </table></div>
+  <div class="note">apose와 Medirevive Co., Ltd는 식별하지 못함. 검색에서 나오지 않았고 추정 도메인은 주차 페이지, 도메인 판매 페이지, 접속 불가였음. 정확한 사이트 주소나 출처가 필요함.</div>
+  <p class="meta">출처: <a href="https://compl.co.kr/dermatology-marketing">컴플</a> · <a href="https://winaid.co.kr/">윈에이드</a> · <a href="https://geocompany.co.kr/">지오컴퍼니</a> · <a href="https://www.optislab.io/online-leads/industry/hospital/">옵티스랩</a> · <a href="https://www.unicornfactory.co.kr/article/2025111710130882365">클라우드호스피탈 기사</a></p>
+</section>
+
+<section>
+  <h2>재무 비교</h2>
+  <div class="tw"><table>
+    <thead><tr><th>업체</th><th>영역</th><th>확인된 기능</th><th>EMR 연동</th><th>1stCRM과의 관계</th></tr></thead>
+    <tbody>
+      <tr><td>메디바로 (라젠카AI)</td><td>청구채권 선정산</td><td>청구 데이터 기반 한도 산정, 채권 양도, KB국민카드 자금. 2026-07 출시</td><td>의사랑·유팜(GC메디아이)에서 급여 청구 데이터 전달</td><td>EMR이 핀테크에 데이터를 제공하는 선례. 비급여 매출은 기사에 없음</td></tr>
+      <tr><td>그랜터</td><td>AI 회계·재무</td><td>은행·카드 연동, 손익계산서 자동 작성, 병원용 분석(비급여 비중, 인건비율, 의사 1인당 수익)</td><td>확인 못함. 병원 전용 제품 아님</td><td>환자·시술 단위 수납 데이터는 없음</td></tr>
+      <tr><td>닥터북 (택스앤소프트)</td><td>병의원 세무리스크</td><td>수입·지출 자동 집계, 모의세무조사, 분석 리포트</td><td>확인 못함</td><td>—</td></tr>
+      <tr><td>ROI / ROILite (숨메디텍·엠시스텍)</td><td>삭감 예방 AI</td><td>처방 단계 삭감 가능성 예측, 심평원 사례 학습</td><td>확인 못함. 베타 단계</td><td>급여 청구 중심이라 비급여 병원과 거리 있음</td></tr>
+      <tr><td>닥터스 PAY (헥톤프로젝트)</td><td>진료비 안내·결제·미수</td><td>안내 문자 발송, 앱 없이 결제, 반복 미수금 관리</td><td>EMR 일체형</td><td>병원급(요양·재활) 중심</td></tr>
+      <tr><td>서울메디컬CFO (키노티시스템)</td><td>마케팅·세무 통합</td><td>유입경로 추적, 정산·통계, 세무 연계</td><td>확인 못함</td><td>2022년 자료, 현황 확인 못함</td></tr>
+    </tbody>
+  </table></div>
+  <div class="note">Dr.Cash는 한국 병원 재무 서비스로 식별하지 못함. 검색에 나온 Dr.Cash는 브라질 의료 할부금융 핀테크이고 한국 사업은 확인되지 않음. 이름이 비슷한 환자용 리워드 포인트 서비스와 실비청구 앱도 있었음. 지목된 곳이 다른 서비스라면 회사명이나 URL이 필요함.</div>
+  <p class="meta">출처: <a href="https://view.asiae.co.kr/en/article/2026071309212868649">메디바로</a> · <a href="https://www.granter.biz">그랜터</a> · <a href="https://www.dailymedi.com/news/news_view.php?wr_id=933226">ROI</a> · <a href="https://www.sedaily.com/article/20086202">닥터스 PAY</a> · <a href="https://drcash.com.br/">Dr.Cash(브라질)</a></p>
+</section>
+
+<section>
+  <h2>1stCRM 가치 상승 방안</h2>
+  <p class="sub">아래는 조사 결과에서 끌어낸 가설임. 우선순위와 선택은 사람이 정함.</p>
+  <div class="tw"><table>
+    <thead><tr><th>레버</th><th>근거</th><th>내용</th></tr></thead>
+    <tbody>
+      <tr><td>1. 데이터 허브·연동 마켓</td><td>베가스CRM의 AiU 연동, 강남언니의 CRM 연동 목록, 메디바로의 EMR 데이터 연동, 애프터닥·AiU·래니는 EMR 없음</td><td>AI·마케팅·금융 업체가 연결하고 싶어 하는 데이터 보유 EMR이 됨. 연동 파트너를 늘리고 병원당 연동 모듈 매출을 만듦. 매각 시 전략적 가치와 연결됨</td></tr>
+      <tr><td>2. 폐루프 전환 추적</td><td>컴플은 3단계 전환을 병원 데이터에 의존, 옵티스랩은 병원이 결과를 직접 입력, 조사한 CRM 업체 대부분에서 전환·ROI 추적은 확인 못함</td><td>유입경로 → 상담 → 결제를 EMR 데이터로 자동 연결함. 마케팅 업체에게도 필요한 데이터라 병원과 대행사 양쪽에 판매 가능함</td></tr>
+      <tr><td>3. 비급여 재무 연동</td><td>메디바로는 건강보험 청구만, 그랜터는 환자·시술 단위 수납 데이터 없음</td><td>시술별 매출과 객단가 손익 대시보드, 분납·선정산 연계 수수료를 만듦. 금융사는 제휴 상대가 됨</td></tr>
+      <tr><td>4. AI 모듈 종량제</td><td>애프터닥이 "필요한 AI 기능만 선택해 사용량만큼 지불"</td><td>자체 AI(세그먼트, 성과, 일일 제안)는 코어로 키우고, 응대·전화 같은 레이어는 파트너 연동과 병행함</td></tr>
+      <tr><td>5. 마케팅 번들·성과 연동</td><td>사내 로드맵(광고대행, 네이버 리베이트)과 컴플의 월 예산 구조</td><td>CRM 전환 데이터를 근거로 광고 운영을 묶음. 성과 과금은 대조군 구조가 먼저 필요함</td></tr>
+      <tr><td>6. 신규 개원 방어</td><td>베가스CRM이 신규 개원 시장의 약 45%를 차지한다고 주장</td><td>개원 병원에 CRM·마케팅·금융을 묶은 패키지를 제안해 신규 유입 경로를 만듦</td></tr>
+    </tbody>
+  </table></div>
+  <div class="grid3">
+    <div class="box"><span class="tag">선택지 A</span><h3>개방형 데이터 허브</h3><p>자체 AI는 최소화하고 파트너 연동에 집중함. 개발 부담이 작고 빠름. 대신 1stCRM만의 차별 기능은 약해짐.</p></div>
+    <div class="box"><span class="tag">선택지 B</span><h3>풀스택 자체 구축</h3><p>AI, 마케팅, 금융을 모두 자체 개발함. 통제력은 크지만 인력과 시간이 가장 많이 듦.</p></div>
+    <div class="box key"><span class="tag">제안 · 선택지 C</span><h3>하이브리드</h3><p>전환 추적, 세그먼트, 성과 기록 같은 코어 데이터 구조는 자체로 만들고, 음성·챗 응대 AI는 파트너를 연동함. 데이터 구조가 자산이 되고 AI 응대는 시장에 이미 공급자가 많기 때문임.</p></div>
+  </div>
+</section>
+</main>
