@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>병원 홈페이지 AI 검색 점수</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: 점수 현황. 요약 → 점수 분포 → 영역별 평균 → 항목별 평균 득점 → 놓친 점수 → 업종별 → 미흡 항목 수 → 시사점 */
+:root{
+  --bg:#F6F7FA; --surface:#FFFFFF; --fg:#0B1630; --muted:#5A6580; --line2:#AEB8CC; --zebra:#F1F4FA;
+  --navy:#03153B; --onnavy:#FFFFFF; --blue:#1070FC; --link:#0C56C2; --tint:#E8F0FE; --bar:#C9D3E6;
+  --good:#12805C; --warn:#B26A00; --crit:#B3261E;
+  --sans:"IBM Plex Sans KR",system-ui,sans-serif; --mono:"IBM Plex Mono",ui-monospace,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#050E24; --surface:#0A1A3D; --fg:#E6EAF4; --muted:#9AA6C0; --line2:#3B568F; --zebra:#0C1F47;
+  --navy:#132B5E; --blue:#5B9BFF; --link:#7DB0FF; --tint:#10264F; --bar:#2A4275;
+  --good:#4CC9A0; --warn:#E0A32E; --crit:#FF8A80; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#050E24; --surface:#0A1A3D; --fg:#E6EAF4; --muted:#9AA6C0; --line2:#3B568F; --zebra:#0C1F47;
+  --navy:#132B5E; --blue:#5B9BFF; --link:#7DB0FF; --tint:#10264F; --bar:#2A4275;
+  --good:#4CC9A0; --warn:#E0A32E; --crit:#FF8A80; color-scheme:dark}
+body{background:var(--bg);color:var(--fg);font-family:var(--sans);font-size:15px;line-height:1.7}
+main{max-width:1040px;margin-inline:auto;padding-left:max(20px,env(safe-area-inset-left,0px));padding-right:max(20px,env(safe-area-inset-right,0px));padding-block:40px 80px;display:flex;flex-direction:column;gap:44px}
+h1{font-size:30px;line-height:1.3;margin:0;font-weight:700;text-wrap:balance}
+h2{font-size:20px;margin:0;font-weight:700;text-wrap:balance}
+h3{font-size:15px;margin:0;font-weight:600}
+p{margin:0}
+header,section{display:flex;flex-direction:column;gap:14px;min-width:0}
+.eyebrow,th,.lbl{font-family:var(--mono);font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.lede{font-size:17px;max-width:70ch}
+.sub{color:var(--muted);font-size:14px;max-width:80ch}
+.note{border-left:3px solid var(--warn);padding:10px 14px;background:var(--surface);font-size:14px;max-width:86ch}
+.grid4{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px}
+.grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px}
+.box{background:var(--surface);border:1px solid var(--line2);padding:14px 16px;display:flex;flex-direction:column;gap:6px;min-width:0}
+.box.key{border-color:var(--blue);background:var(--tint)}
+.num{font-family:var(--mono);font-size:28px;font-weight:500;line-height:1.15;font-variant-numeric:tabular-nums}
+.num small{font-size:14px;color:var(--muted);margin-left:4px}
+.box p{font-size:13.5px;line-height:1.6}
+.box ul{font-size:13.5px;gap:3px}
+.mod h3{font-size:17px}
+.mod .price{font-family:var(--mono);font-size:22px;color:var(--blue)}
+.who{font-size:12.5px;color:var(--muted)}
+.chart{background:var(--surface);border:1px solid var(--line2);padding:16px;display:flex;flex-direction:column;gap:8px}
+.br{display:grid;grid-template-columns:170px 1fr 92px;gap:12px;align-items:center;font-size:13.5px}
+@media (max-width:560px){.br{grid-template-columns:110px 1fr 64px;font-size:12.5px}}
+.tr{height:18px;background:var(--zebra);position:relative}
+.fl{position:absolute;inset:0 auto 0 0;background:var(--bar)}
+.br.hi .fl{background:var(--blue)}
+.v{font-family:var(--mono);font-variant-numeric:tabular-nums;text-align:right;font-size:12.5px}
+.tw{overflow-x:auto;border:1px solid var(--line2);background:var(--surface)}
+table{border-collapse:collapse;width:100%;min-width:760px;font-size:13.5px}
+th,td{text-align:left;padding:9px 12px;border:1px solid var(--line2);vertical-align:top;line-height:1.6}
+thead th{background:var(--tint);color:var(--fg)}
+tbody tr:nth-child(even) td{background:var(--zebra)}
+tr.grp td{background:var(--navy)!important;color:var(--onnavy);font-weight:600;font-size:12.5px}
+td.n{font-family:var(--mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+td:first-child{font-weight:600}
+.pill{font-family:var(--mono);font-size:11px;padding:1px 7px;border:1px solid currentColor;white-space:nowrap}
+.p-ok{color:var(--good)} .p-no{color:var(--crit)} .p-mid{color:var(--warn)}
+ul,ol{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px;font-size:14.5px;max-width:86ch}
+a{color:var(--link)}
+@media (max-width:520px){h1{font-size:24px}}
+
+.ib{display:grid;grid-template-columns:150px 1fr 96px;gap:12px;align-items:center;font-size:13.5px}
+@media (max-width:560px){.ib{grid-template-columns:100px 1fr 74px;font-size:12.5px}}
+.ib .tr{height:18px}
+.ib .fl.a{background:var(--blue)}
+.ib .lost{position:absolute;top:0;bottom:0;background:repeating-linear-gradient(45deg,var(--crit) 0 2px,transparent 2px 6px);opacity:.55}
+.legend{display:flex;gap:16px;flex-wrap:wrap;font-size:12.5px;color:var(--muted);align-items:center}
+.sw{display:inline-block;width:12px;height:12px;margin-right:6px;vertical-align:-1px}
+.grp3{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
+.ar .num{color:var(--blue)}
+.ar .tr{height:10px;background:var(--zebra);position:relative}
+.ar .fl{position:absolute;inset:0 auto 0 0;background:var(--blue)}
+</style>
+</head>
+<body>
+<main>
+<header>
+  <span class="eyebrow">Cofoundary · 병원 홈페이지 AI 검색 점수 · 2026-11-18</span>
+  <h1>성형외과·피부과 홈페이지 AI 검색 점수 현황</h1>
+  <p class="lede">국내 성형외과·피부과 184곳의 홈페이지 평균은 100점 만점에 54.5점. 검색엔진 기본기(SEO)는 70%를 갖췄지만, AI가 답을 만들 때 쓰는 항목(AEO)은 32%에 그침. 놓친 점수의 3/4이 네 항목에 몰려 있음.</p>
+  <p class="note">2026-11-17 진단. 국내 성형외과·피부과(일부 치과 포함) 201곳 중 점수가 나온 184곳(접속 실패 4곳, 홈페이지 확인 안 됨 13곳 제외). 공개 정보(홈페이지, robots.txt, sitemap.xml, llms.txt)만 읽어 12개 항목 100점 만점으로 매김. 병원명 없이 평균·분포만 씀.</p>
+</header>
+
+<section>
+  <h2>요약</h2>
+  <div class="grid4">
+    <div class="box key"><span class="lbl">평균 점수</span><span class="num">54.5<small>/ 100</small></span><p>가운데 값 53점. 100점은 5곳</p></div>
+    <div class="box"><span class="lbl">등급</span><span class="num">42<small>% 시급</small></span><p>50점 미만 78곳 · 50~79점 76곳 · 80점 이상 30곳</p></div>
+    <div class="box key"><span class="lbl">가장 약한 항목</span><span class="num">FAQ 0.8<small>/ 10</small></span><p>184곳 중 14곳만 갖춤</p></div>
+    <div class="box"><span class="lbl">디자인 안 건드리고 채울 수 있는 점수</span><span class="num">+36.4<small>점</small></span><p>평균 54.5 → 약 91점까지 가능한 몫</p></div>
+  </div>
+</section>
+
+<section>
+  <h2>점수 분포</h2>
+  <div class="chart">
+    <span class="lbl">점수대별 병원 수 (184곳) · 진한 막대 = 80점 이상</span>
+<div class="br"><span>20~29점</span><span class="tr"><span class="fl" style="width:61.3%"></span></span><span class="v">19곳</span></div>
+<div class="br"><span>30~39점</span><span class="tr"><span class="fl" style="width:96.8%"></span></span><span class="v">30곳</span></div>
+<div class="br"><span>40~49점</span><span class="tr"><span class="fl" style="width:93.5%"></span></span><span class="v">29곳</span></div>
+<div class="br"><span>50~59점</span><span class="tr"><span class="fl" style="width:100.0%"></span></span><span class="v">31곳</span></div>
+<div class="br"><span>60~69점</span><span class="tr"><span class="fl" style="width:83.9%"></span></span><span class="v">26곳</span></div>
+<div class="br"><span>70~79점</span><span class="tr"><span class="fl" style="width:61.3%"></span></span><span class="v">19곳</span></div>
+<div class="br hi"><span>80~89점</span><span class="tr"><span class="fl" style="width:64.5%"></span></span><span class="v">20곳</span></div>
+<div class="br hi"><span>90~100점</span><span class="tr"><span class="fl" style="width:32.3%"></span></span><span class="v">10곳</span></div>
+  </div>
+  <p class="sub">20점 미만은 없고 20~60점대에 절반 넘게 몰려 있음.</p>
+</section>
+
+<section>
+  <h2>영역별 평균</h2>
+  <div class="grp3">
+    <div class="box ar"><span class="lbl">SEO · 검색엔진</span><span class="num">31.6<small>/ 45 · 70%</small></span><span class="tr"><span class="fl" style="width:70%"></span></span><p>HTTPS·모바일·검색엔진 허용 등 기본기는 대부분 갖춤. 제목 지역명·사이트맵이 약함</p></div>
+    <div class="box ar key"><span class="lbl">AEO · 답변</span><span class="num">12.7<small>/ 40 · 32%</small></span><span class="tr"><span class="fl" style="width:32%"></span></span><p>병원 정보 구조화·FAQ·시술 안내 글 세 항목 모두 절반 미만</p></div>
+    <div class="box ar"><span class="lbl">GEO · AI 검색</span><span class="num">10.2<small>/ 15 · 68%</small></span><span class="tr"><span class="fl" style="width:68%"></span></span><p>AI 봇 허용·공유 미리보기는 대부분 갖춤. llms.txt는 20%만</p></div>
+  </div>
+</section>
+
+<section>
+  <h2>항목별 평균 득점</h2>
+  <div class="tw"><table>
+    <thead><tr><th>항목</th><th>배점</th><th>평균 득점</th><th>득점률</th><th>통과</th><th>부분</th><th>미흡</th></tr></thead>
+    <tbody>
+<tr class="grp"><td colspan="7">SEO · 45점 만점 · 평균 31.6점</td></tr>
+<tr><td>보안 연결 (HTTPS)</td><td class="n">5</td><td class="n"><b>3.3</b></td><td><span class="pill p-mid">67%</span></td><td class="n">123곳</td><td class="n">—</td><td class="n">61곳</td></tr>
+<tr><td>제목에 지역명</td><td class="n">10</td><td class="n"><b>3.9</b></td><td><span class="pill p-no">39%</span></td><td class="n">72곳</td><td class="n">—</td><td class="n">112곳</td></tr>
+<tr><td>검색 결과 설명문</td><td class="n">5</td><td class="n"><b>4.5</b></td><td><span class="pill p-ok">89%</span></td><td class="n">155곳</td><td class="n">16곳</td><td class="n">13곳</td></tr>
+<tr><td>모바일 화면</td><td class="n">5</td><td class="n"><b>3.9</b></td><td><span class="pill p-ok">77%</span></td><td class="n">142곳</td><td class="n">—</td><td class="n">42곳</td></tr>
+<tr><td>사이트맵</td><td class="n">10</td><td class="n"><b>6.1</b></td><td><span class="pill p-mid">61%</span></td><td class="n">113곳</td><td class="n">—</td><td class="n">71곳</td></tr>
+<tr><td>검색엔진 접근 허용</td><td class="n">10</td><td class="n"><b>9.8</b></td><td><span class="pill p-ok">98%</span></td><td class="n">181곳</td><td class="n">—</td><td class="n">3곳</td></tr>
+<tr class="grp"><td colspan="7">AEO · 40점 만점 · 평균 12.7점</td></tr>
+<tr><td>병원 정보 구조화</td><td class="n">15</td><td class="n"><b>4.9</b></td><td><span class="pill p-no">33%</span></td><td class="n">47곳</td><td class="n">24곳</td><td class="n">113곳</td></tr>
+<tr><td>FAQ 구조화</td><td class="n">10</td><td class="n"><b>0.8</b></td><td><span class="pill p-no">8%</span></td><td class="n">14곳</td><td class="n">—</td><td class="n">170곳</td></tr>
+<tr><td>시술 안내 글</td><td class="n">15</td><td class="n"><b>7.1</b></td><td><span class="pill p-mid">47%</span></td><td class="n">68곳</td><td class="n">35곳</td><td class="n">81곳</td></tr>
+<tr class="grp"><td colspan="7">GEO · 15점 만점 · 평균 10.2점</td></tr>
+<tr><td>AI 안내 파일 (llms.txt)</td><td class="n">5</td><td class="n"><b>1.0</b></td><td><span class="pill p-no">20%</span></td><td class="n">37곳</td><td class="n">—</td><td class="n">147곳</td></tr>
+<tr><td>AI 검색 접근 허용</td><td class="n">5</td><td class="n"><b>4.8</b></td><td><span class="pill p-ok">95%</span></td><td class="n">162곳</td><td class="n">22곳</td><td class="n">0곳</td></tr>
+<tr><td>공유 미리보기</td><td class="n">5</td><td class="n"><b>4.5</b></td><td><span class="pill p-ok">89%</span></td><td class="n">160곳</td><td class="n">7곳</td><td class="n">17곳</td></tr>
+    </tbody>
+  </table></div>
+  <p class="sub">통과 = 배점 전부, 부분 = 절반(반올림), 미흡 = 0점. 12개 항목 평균 득점의 합이 평균 점수 54.5점.</p>
+</section>
+
+<section>
+  <h2>어디서 점수를 놓치나</h2>
+  <div class="legend"><span><i class="sw" style="background:var(--blue)"></i>평균 득점</span><span><i class="sw" style="background:repeating-linear-gradient(45deg,var(--crit) 0 2px,transparent 2px 6px);opacity:.7"></i>놓친 점수</span></div>
+  <div class="chart">
+    <span class="lbl">항목별 평균 득점 / 배점 (놓친 점수가 큰 순)</span>
+<div class="ib"><span>병원 정보 구조화</span><span class="tr"><span class="fl a" style="width:32.5%"></span><span class="lost" style="left:32.5%;width:67.5%"></span></span><span class="v">4.9 / 15</span></div>
+<div class="ib"><span>FAQ 구조화</span><span class="tr"><span class="fl a" style="width:5.1%"></span><span class="lost" style="left:5.1%;width:61.6%"></span></span><span class="v">0.8 / 10</span></div>
+<div class="ib"><span>시술 안내 글</span><span class="tr"><span class="fl a" style="width:47.1%"></span><span class="lost" style="left:47.1%;width:52.9%"></span></span><span class="v">7.1 / 15</span></div>
+<div class="ib"><span>제목에 지역명</span><span class="tr"><span class="fl a" style="width:26.1%"></span><span class="lost" style="left:26.1%;width:40.6%"></span></span><span class="v">3.9 / 10</span></div>
+<div class="ib"><span>AI 안내 파일 (llms.txt)</span><span class="tr"><span class="fl a" style="width:6.7%"></span><span class="lost" style="left:6.7%;width:26.6%"></span></span><span class="v">1.0 / 5</span></div>
+<div class="ib"><span>사이트맵</span><span class="tr"><span class="fl a" style="width:40.9%"></span><span class="lost" style="left:40.9%;width:25.7%"></span></span><span class="v">6.1 / 10</span></div>
+<div class="ib"><span>보안 연결 (HTTPS)</span><span class="tr"><span class="fl a" style="width:22.3%"></span><span class="lost" style="left:22.3%;width:11.1%"></span></span><span class="v">3.3 / 5</span></div>
+<div class="ib"><span>모바일 화면</span><span class="tr"><span class="fl a" style="width:25.7%"></span><span class="lost" style="left:25.7%;width:7.6%"></span></span><span class="v">3.9 / 5</span></div>
+<div class="ib"><span>공유 미리보기</span><span class="tr"><span class="fl a" style="width:29.7%"></span><span class="lost" style="left:29.7%;width:3.6%"></span></span><span class="v">4.5 / 5</span></div>
+<div class="ib"><span>검색 결과 설명문</span><span class="tr"><span class="fl a" style="width:29.8%"></span><span class="lost" style="left:29.8%;width:3.5%"></span></span><span class="v">4.5 / 5</span></div>
+<div class="ib"><span>AI 검색 접근 허용</span><span class="tr"><span class="fl a" style="width:31.7%"></span><span class="lost" style="left:31.7%;width:1.6%"></span></span><span class="v">4.8 / 5</span></div>
+<div class="ib"><span>검색엔진 접근 허용</span><span class="tr"><span class="fl a" style="width:65.6%"></span><span class="lost" style="left:65.6%;width:1.1%"></span></span><span class="v">9.8 / 10</span></div>
+  </div>
+  <div class="tw"><table>
+    <thead><tr><th>항목</th><th>평균 놓친 점수</th><th>비중</th><th>누적</th><th>채우는 방법</th></tr></thead>
+    <tbody>
+<tr><td>병원 정보 구조화</td><td class="n">10.1점</td><td class="n">22%</td><td class="n">22%</td><td>기존 홈페이지에 추가</td></tr>
+<tr><td>FAQ 구조화</td><td class="n">9.2점</td><td class="n">20%</td><td class="n">43%</td><td>기존 홈페이지에 추가</td></tr>
+<tr><td>시술 안내 글</td><td class="n">7.9점</td><td class="n">17%</td><td class="n">60%</td><td>글 작성 필요 (리뉴얼 쪽)</td></tr>
+<tr><td>제목에 지역명</td><td class="n">6.1점</td><td class="n">13%</td><td class="n">73%</td><td>기존 홈페이지에 추가</td></tr>
+<tr><td>AI 안내 파일 (llms.txt)</td><td class="n">4.0점</td><td class="n">9%</td><td class="n">82%</td><td>기존 홈페이지에 추가</td></tr>
+<tr><td>사이트맵</td><td class="n">3.9점</td><td class="n">8%</td><td class="n">91%</td><td>기존 홈페이지에 추가</td></tr>
+<tr><td>보안 연결 (HTTPS)</td><td class="n">1.7점</td><td class="n">4%</td><td class="n">94%</td><td>기존 홈페이지에 추가</td></tr>
+<tr><td>모바일 화면</td><td class="n">1.1점</td><td class="n">3%</td><td class="n">97%</td><td>화면 구조 수정</td></tr>
+<tr><td>공유 미리보기</td><td class="n">0.5점</td><td class="n">1%</td><td class="n">98%</td><td>기존 홈페이지에 추가</td></tr>
+<tr><td>검색 결과 설명문</td><td class="n">0.5점</td><td class="n">1%</td><td class="n">99%</td><td>기존 홈페이지에 추가</td></tr>
+<tr><td>AI 검색 접근 허용</td><td class="n">0.2점</td><td class="n">1%</td><td class="n">100%</td><td>기존 홈페이지에 추가</td></tr>
+<tr><td>검색엔진 접근 허용</td><td class="n">0.2점</td><td class="n">0%</td><td class="n">100%</td><td>기존 홈페이지에 추가</td></tr>
+    </tbody>
+  </table></div>
+  <p class="sub">평균 놓친 점수 45.5점 중 상위 네 항목(병원 정보 구조화·FAQ·시술 안내 글·제목 지역명)이 33.4점(73%).</p>
+</section>
+
+<section>
+  <h2>업종별</h2>
+  <div class="tw"><table>
+    <thead><tr><th>업종</th><th>병원 수</th><th>평균</th><th>가운데 값</th><th>SEO /45</th><th>AEO /40</th><th>GEO /15</th></tr></thead>
+    <tbody>
+<tr><td>성형외과</td><td class="n">165곳</td><td class="n"><b>53.3</b></td><td class="n">51</td><td class="n">31.0</td><td class="n">12.1</td><td class="n">10.2</td></tr>
+<tr><td>피부과</td><td class="n">16곳</td><td class="n"><b>64.0</b></td><td class="n">63</td><td class="n">35.6</td><td class="n">17.8</td><td class="n">10.6</td></tr>
+<tr><td>치과</td><td class="n">3곳</td><td class="n"><b>68.0</b></td><td class="n">68</td><td class="n">41.7</td><td class="n">17.7</td><td class="n">8.7</td></tr>
+    </tbody>
+  </table></div>
+  <div class="tw"><table>
+    <thead><tr><th>항목별 평균 득점</th><th>배점</th><th>전체</th><th>성형외과</th><th>피부과</th><th>치과</th></tr></thead>
+    <tbody>
+<tr><td>보안 연결 (HTTPS)</td><td class="n">5</td><td class="n">3.3</td><td class="n">3.3</td><td class="n">3.1</td><td class="n">5.0</td></tr>
+<tr><td>제목에 지역명</td><td class="n">10</td><td class="n">3.9</td><td class="n">3.7</td><td class="n">5.0</td><td class="n">10.0</td></tr>
+<tr><td>검색 결과 설명문</td><td class="n">5</td><td class="n">4.5</td><td class="n">4.5</td><td class="n">4.7</td><td class="n">3.3</td></tr>
+<tr><td>모바일 화면</td><td class="n">5</td><td class="n">3.9</td><td class="n">3.8</td><td class="n">4.7</td><td class="n">3.3</td></tr>
+<tr><td>사이트맵</td><td class="n">10</td><td class="n">6.1</td><td class="n">5.8</td><td class="n">8.8</td><td class="n">10.0</td></tr>
+<tr><td>검색엔진 접근 허용</td><td class="n">10</td><td class="n">9.8</td><td class="n">9.9</td><td class="n">9.4</td><td class="n">10.0</td></tr>
+<tr><td>병원 정보 구조화</td><td class="n">15</td><td class="n">4.9</td><td class="n">4.7</td><td class="n">7.1</td><td class="n">5.0</td></tr>
+<tr><td>FAQ 구조화</td><td class="n">10</td><td class="n">0.8</td><td class="n">0.7</td><td class="n">1.2</td><td class="n">0.0</td></tr>
+<tr><td>시술 안내 글</td><td class="n">15</td><td class="n">7.1</td><td class="n">6.7</td><td class="n">9.4</td><td class="n">12.7</td></tr>
+<tr><td>AI 안내 파일 (llms.txt)</td><td class="n">5</td><td class="n">1.0</td><td class="n">1.0</td><td class="n">0.9</td><td class="n">0.0</td></tr>
+<tr><td>AI 검색 접근 허용</td><td class="n">5</td><td class="n">4.8</td><td class="n">4.7</td><td class="n">5.0</td><td class="n">5.0</td></tr>
+<tr><td>공유 미리보기</td><td class="n">5</td><td class="n">4.5</td><td class="n">4.5</td><td class="n">4.7</td><td class="n">3.7</td></tr>
+    </tbody>
+  </table></div>
+  <p class="sub">피부과는 사이트맵·시술 안내 글·병원 정보 구조화에서 성형외과보다 높음. 피부과 16곳·치과 3곳은 병원 수가 적어 참고용.</p>
+</section>
+
+<section>
+  <h2>병원당 미흡 항목 수</h2>
+  <div class="chart">
+    <span class="lbl">12개 항목 중 미흡(0점) 개수별 병원 수 · 평균 5.1개</span>
+<div class="br hi"><span>미흡 0개</span><span class="tr"><span class="fl" style="width:15.6%"></span></span><span class="v">5곳</span></div>
+<div class="br hi"><span>미흡 1개</span><span class="tr"><span class="fl" style="width:15.6%"></span></span><span class="v">5곳</span></div>
+<div class="br"><span>미흡 2개</span><span class="tr"><span class="fl" style="width:56.2%"></span></span><span class="v">18곳</span></div>
+<div class="br"><span>미흡 3개</span><span class="tr"><span class="fl" style="width:56.2%"></span></span><span class="v">18곳</span></div>
+<div class="br"><span>미흡 4개</span><span class="tr"><span class="fl" style="width:90.6%"></span></span><span class="v">29곳</span></div>
+<div class="br"><span>미흡 5개</span><span class="tr"><span class="fl" style="width:78.1%"></span></span><span class="v">25곳</span></div>
+<div class="br"><span>미흡 6개</span><span class="tr"><span class="fl" style="width:100.0%"></span></span><span class="v">32곳</span></div>
+<div class="br"><span>미흡 7개</span><span class="tr"><span class="fl" style="width:71.9%"></span></span><span class="v">23곳</span></div>
+<div class="br"><span>미흡 8개</span><span class="tr"><span class="fl" style="width:56.2%"></span></span><span class="v">18곳</span></div>
+<div class="br"><span>미흡 9개</span><span class="tr"><span class="fl" style="width:28.1%"></span></span><span class="v">9곳</span></div>
+<div class="br"><span>미흡 10개</span><span class="tr"><span class="fl" style="width:6.2%"></span></span><span class="v">2곳</span></div>
+  </div>
+  <p class="sub">미흡이 0~1개인 병원은 10곳. 대부분 4~7개 항목이 비어 있음.</p>
+</section>
+
+<section>
+  <h2>우리에게 주는 시사점</h2>
+  <h3>1. 대부분의 병원이 AI 검색 보완 대상</h3>
+  <p class="sub">80점 미만이 154곳(84%). 그로스·프로 가입 시 무료로 주는 "AI 검색 보완"이 거의 모든 병원에 해당함.</p>
+  <h3>2. 보완만으로 80점을 넘길 여지가 큼</h3>
+  <p class="sub">놓친 점수 중 디자인을 건드리지 않고 기존 홈페이지에 넣을 수 있는 몫이 약 36.4점. 보완 상품의 "80점 이상 납품"이 무리 없는 약속임.</p>
+  <h3>3. 병원 기본 정보와 상담 질문으로 채울 수 있는 항목이 가장 큼</h3>
+  <p class="sub">병원 정보 구조화(놓친 10.1점)와 FAQ(9.2점)는 의료진·시술·진료시간과 상담 질문으로 만들 수 있음. 홈페이지 운영 모듈의 자동 유지 기능이 바로 이 두 항목.</p>
+  <h3>4. 시술 안내 글은 리뉴얼과 콘텐츠 모듈의 몫</h3>
+  <p class="sub">설명이 이미지 안에만 있는 병원이 많아 글을 새로 써야 함. 템플릿 리뉴얼과 콘텐츠 모듈(시술 글·FAQ 반영)로 채움.</p>
+  <h3>5. 점수는 환자 수가 아니라 "AI가 읽을 수 있는가"</h3>
+  <p class="sub">점수는 AI와 검색엔진이 병원 정보를 읽을 수 있는지만 봄. 진단 대화의 출발점으로 쓰고, 환자 증가로 연결해 말하지 않음.</p>
+</section>
+</main>
+
+</body>
+</html>
