@@ -6,3 +6,4 @@
 - `general-crm.html` 범용 CRM 제품 기획 (코어 + 업종 팩 구조)
 - `competitor-analysis.html` 병원 CRM 경쟁 비교 (CRM·마케팅·재무 영역 업체 비교와 1stCRM 가치 상승 방안)
 - `workflow-map.html` 워크플로 기반 기능 정의 (워크플로우 7단계, 기능 31개, 온톨로지 맵, 업체×단계 매핑, 수신 동의 요건, 해외 고객 유치)
+- `pricing-plans.html` 마케팅 자동화 요금제별 기능 비교 (라이트·그로스·프로, 홈페이지 제작비, 단계별 업그레이드 이유). 가격은 확정 전
